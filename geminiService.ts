@@ -41,7 +41,9 @@ export const searchMobileWithAI = async (query: string): Promise<{
       },
     });
 
-    const parsedData = JSON.parse(response.text);
+    // Fix: Provide fallback empty string to satisfy TypeScript string requirement for JSON.parse
+    const jsonString = response.text || '{"summary": "No data found.", "phones": []}';
+    const parsedData = JSON.parse(jsonString);
     const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
 
     return {
@@ -53,7 +55,7 @@ export const searchMobileWithAI = async (query: string): Promise<{
         brand: p.brand,
         price: p.price,
         currency: 'Rs.',
-        image: `https://picsum.photos/seed/${p.name.replace(/\s/g, '')}/400/500`,
+        image: `https://picsum.photos/seed/${encodeURIComponent(p.name)}/400/500`,
         specs: {
           processor: p.processor || 'N/A',
           ram: p.ram || 'N/A',
